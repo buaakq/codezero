@@ -1,0 +1,78 @@
+/*
+ * Posix pager MM0 linker script.
+ *
+ * Copyright (C) 2007 - 2009 Bahadir Balban
+ */
+
+virtual_base = %s;
+physical_base = %s;
+
+pager_offset = virtual_base - physical_base;
+
+OUTPUT_ARCH(arm)
+ENTRY(_start)
+
+PHDRS
+{
+	rx PT_LOAD;
+	rw PT_LOAD;
+}
+
+SECTIONS
+{
+	. = virtual_base;
+
+	/* Put all RX, RO sections here */
+	__start_text = .;
+	.text : AT (ADDR(.text) - pager_offset)
+	{
+		*(.text.head) *(.text)
+	} : rx = 0x90909090
+	__end_text = .;
+
+	__start_rodata = .;
+	.rodata : AT (ADDR(.rodata) - pager_offset)
+	{
+		*(.rodata)
+	} : rx = 0x90909090
+	.rodata1 : AT (ADDR(.rodata1) - pager_offset)
+	{
+		*(.rodata1)
+	} : rx = 0x90909090
+	__end_rodata = .;
+
+	. = ALIGN(4K);
+
+	/* Put all RW sections here */
+	__start_data = .;
+	.data : AT (ADDR(.data) - pager_offset)
+	{
+		*(.data)
+	} : rw
+	__end_data = .;
+
+	__start_bss = .;
+	.bss : AT (ADDR(.bss) - pager_offset)
+	{
+		*(.bss)
+	} : rw
+	__end_bss = .;
+
+	__start_stack = .;
+	.stack : AT (ADDR(.stack) - pager_offset)
+	{
+		*(.stack)
+	} : rw
+	__stack = .; /* This is the preallocated boot stack */
+
+	/* Below part is to be discarded after boot */
+	. = ALIGN(4K);
+	__start_init = .;
+	.init : AT (ADDR(.init) - pager_offset)
+	{
+		*(.init.data)
+		*(.init.bootmem)
+	} : rw
+	__end_init = .;
+	__end = .;
+}

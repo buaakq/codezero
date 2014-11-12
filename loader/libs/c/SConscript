@@ -1,0 +1,40 @@
+# -*- mode: python; coding: utf-8; -*-
+#
+#  Codezero -- Virtualization microkernel for embedded systems.
+#
+#  Copyright © 2009  B Labs Ltd
+
+import os, sys, shelve
+from os.path import join
+
+# Get global paths
+PROJRELROOT = '../../../'
+sys.path.append(PROJRELROOT)
+
+from scripts.config.configuration import *
+from scripts.config.projpaths import *
+
+config = configuration_retrieve()
+arch = config.arch
+platform = config.platform
+
+Import('env', 'type')
+variant = type
+
+e = env.Clone()
+e.Append(CPPPATH = ['include/sys-' + variant + '/arch-' + arch],
+         CCFLAGS = ['-nostdinc', '-DVARIANT_' + variant.upper()])
+
+source = \
+        Glob('src/*.c') + \
+        Glob('src/sys-' + variant + '/*.c') + \
+        Glob('src/sys-' + variant + '/arch-' + arch + '/*.c') + \
+        Glob('src/sys-' + variant + '/arch-' + arch + '/plat-' + platform + '/*.c') + \
+        Glob('src/arch-' + arch + '/*.c') + \
+        Glob('src/arch-' + arch + '/*.S') + \
+        Glob('crt/sys-' + variant + '/arch-' + arch + '/*.[cS]')
+
+objects = e.StaticObject(source)
+library = e.StaticLibrary('c-' + variant, objects)
+
+Return('library')

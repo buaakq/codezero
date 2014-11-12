@@ -1,0 +1,5 @@
+
+cd build
+qemu-system-arm -s -S -kernel final.elf -M versatilepb -cpu arm926 -nographic &
+arm-none-insight ; pkill qemu-system-arm
+cd ..

@@ -1,0 +1,17 @@
+rm -f cscope.*
+rm -f tags
+
+# Put all sources into a file list.
+find ./loader -name '*.cc' > tagfilelist
+find ./loader -name '*.c' >> tagfilelist
+find ./loader -name '*.h' >> tagfilelist
+find ./loader -name '*.s' >> tagfilelist
+find ./loader -name '*.S' >> tagfilelist
+
+# Use file list to include in tags.
+ctags --languages=C,Asm --recurse -Ltagfilelist
+
+cscope -q -k -R -i tagfilelist
+
+# Remove file list.
+rm -f tagfilelist
