@@ -9,6 +9,7 @@
 #include INC_PLAT(offsets.h)
 
 /* Register offsets */
+/*
 #define PL011_UARTDR		0x00
 #define PL011_UARTRSR		0x04
 #define PL011_UARTECR		0x04
@@ -24,6 +25,7 @@
 #define PL011_UARTMIS		0x40
 #define PL011_UARTICR		0x44
 #define PL011_UARTDMACR		0x48
+*/
 
 #define databit 8
 #define stopbit 1
