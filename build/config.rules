@@ -23,7 +23,7 @@ CPU_ARM11MPCORE		'ARM11 MPCore - Experimental'		text
 ARMv6/ARM11 series based multiprocessor cpu.
 .
 
-CPU_ARM926		'ARM926EJ-S'				text
+CPU_ARM926		'ARM926EJ-Sss'				text
 ARMv5/ARM9 series based uniprocessor cpu.
 .
 
@@ -33,6 +33,10 @@ Select the type of arm platform to be used.
 
 PLATFORM_PB926		'PB926-Versatile Platform'		text
 ARMv5 based versatile-pb platform.
+.
+
+PLATFORM_AM1808  "TI AM1808 Platform"    text
+123123123123123123123123333222222.
 .
 
 PLATFORM_EB		'Realview EB Platform'			text
@@ -146,9 +150,10 @@ choices arch_type
 	default ARCH_ARM
 
 choices arm_platform_type
-        PLATFORM_PB926
-	PLATFORM_EB
-        default PLATFORM_PB926
+    PLATFORM_PB926
+    PLATFORM_EB
+    PLATFORM_AM1808
+    default PLATFORM_PB926
 
 choices arm_cpu_type
 	CPU_ARM926
@@ -209,9 +214,10 @@ derive SUBARCH_V6 from CPU_ARM1136 or
 		       CPU_ARM11MPCORE
 
 #CPU rules:
-unless PLATFORM_PB926                          suppress        CPU_ARM926
+#unless PLATFORM_PB926                          suppress        CPU_ARM926
 unless PLATFORM_EB			       suppress        CPU_ARM11MPCORE
 unless PLATFORM_EB                             suppress        CPU_ARM1136
+#unless PLATFORM_AM1808            suppress  CPU_ARM926
 
 #SMP support rules
 unless CPU_ARM11MPCORE suppress SMP_

@@ -11,7 +11,7 @@ config = configuration_retrieve()
 platform = config.platform
 
 #Platforms using pl050
-plat_list = ('eb', 'pba9', 'pb926')
+plat_list = ('am1808', 'eb', 'pba9', 'pb926')
 
 # The set of source files associated with this SConscript file.
 src_local = []

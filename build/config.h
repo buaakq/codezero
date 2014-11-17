@@ -1,7 +1,7 @@
 /* Automatically generated, don't edit */
-/* Generated on: saucy */
-/* At: Mon, 13 Oct 2014 01:45:22 +0000 */
-/* Linux version 3.11.0-26-generic (buildd@batsu) (gcc version 4.8.1 (Ubuntu/Linaro 4.8.1-10ubuntu8) ) #45-Ubuntu SMP Tue Jul 15 04:04:15 UTC 2014 */
+/* Generated on: kq-pc */
+/* At: Mon, 17 Nov 2014 12:01:19 +0000 */
+/* Linux version 3.13.0-39-generic (buildd@roseapple) (gcc version 4.8.2 (Ubuntu 4.8.2-19ubuntu1) ) #66-Ubuntu SMP Tue Oct 28 13:31:23 UTC 2014 */
 
 /* Codezero Microkernel Configurator */
 
@@ -12,8 +12,9 @@
 /* ARM Architecture Configuration */
 
 /* ARM Platform Type */
-#define CONFIG_PLATFORM_PB926 1
+#undef  CONFIG_PLATFORM_PB926
 #undef  CONFIG_PLATFORM_EB
+#define CONFIG_PLATFORM_AM1808 1
 
 
 /* ARM Processor Type */
@@ -51,11 +52,11 @@
 
 
 /* Container 0 Options */
-#define CONFIG_CONT0_OPT_NAME "hello_world0"
+#define CONFIG_CONT0_OPT_NAME "empty0"
 
 /* Baremetal Project Type */
-#undef  CONFIG_CONT0_BAREMETAL_PROJ_EMPTY
-#define CONFIG_CONT0_BAREMETAL_PROJ_HELLO_WORLD 1
+#define CONFIG_CONT0_BAREMETAL_PROJ_EMPTY 1
+#undef  CONFIG_CONT0_BAREMETAL_PROJ_HELLO_WORLD
 #undef  CONFIG_CONT0_BAREMETAL_PROJ_THREADS_DEMO
 #undef  CONFIG_CONT0_BAREMETAL_PROJ_TEST_SUITE
 #undef  CONFIG_CONT0_BAREMETAL_PROJ_UART_SERVICE

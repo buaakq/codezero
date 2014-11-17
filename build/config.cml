@@ -1,9 +1,9 @@
 #
 # Automatically generated, don't edit
 #
-# Generated on: saucy
-# At: Mon, 13 Oct 2014 01:45:22 +0000
-# Linux version 3.11.0-26-generic (buildd@batsu) (gcc version 4.8.1 (Ubuntu/Linaro 4.8.1-10ubuntu8) ) #45-Ubuntu SMP Tue Jul 15 04:04:15 UTC 2014
+# Generated on: kq-pc
+# At: Mon, 17 Nov 2014 12:01:19 +0000
+# Linux version 3.13.0-39-generic (buildd@roseapple) (gcc version 4.8.2 (Ubuntu 4.8.2-19ubuntu1) ) #66-Ubuntu SMP Tue Oct 28 13:31:23 UTC 2014
 
 #
 # Codezero Microkernel Configurator
@@ -22,8 +22,9 @@ CONFIG_ARCH_ARM=y
 #
 # ARM Platform Type
 #
-CONFIG_PLATFORM_PB926=y
+CONFIG_PLATFORM_PB926=n
 CONFIG_PLATFORM_EB=n
+CONFIG_PLATFORM_AM1808=y
 
 
 #
@@ -77,13 +78,13 @@ CONFIG_CONT0_TYPE_LINUX=n
 #
 # Container 0 Options
 #
-CONFIG_CONT0_OPT_NAME="hello_world0"
+CONFIG_CONT0_OPT_NAME="empty0"
 
 #
 # Baremetal Project Type
 #
-CONFIG_CONT0_BAREMETAL_PROJ_EMPTY=n
-CONFIG_CONT0_BAREMETAL_PROJ_HELLO_WORLD=y
+CONFIG_CONT0_BAREMETAL_PROJ_EMPTY=y
+CONFIG_CONT0_BAREMETAL_PROJ_HELLO_WORLD=n
 CONFIG_CONT0_BAREMETAL_PROJ_THREADS_DEMO=n
 CONFIG_CONT0_BAREMETAL_PROJ_TEST_SUITE=n
 CONFIG_CONT0_BAREMETAL_PROJ_UART_SERVICE=n
