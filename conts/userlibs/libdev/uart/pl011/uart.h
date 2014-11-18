@@ -19,6 +19,8 @@
 #define PL011_BASE		0x101F1000
 #elif defined(CONFIG_PLATFORM_EB) || defined(CONFIG_PLATFORM_PBA9)
 #define PL011_BASE              0x10009000
+#elif defined(CONFIG_PLATFORM_AM1808)
+#define PL011_BASE      0x01d0c0000
 #endif
 #endif
 

@@ -22,7 +22,6 @@
  */
 #ifndef __8250_H__
 #define __8250_H__
-
 #define SS8250_BASE 0x01d0d0000
 
 #define CONFIG_SYS_NS16550_REG_SIZE -4
@@ -172,10 +171,6 @@ int	NS16550_tstc   (NS16550_t com_port);
 void	NS16550_reinit (NS16550_t com_port, int baud_divisor);
 */
 
-
-void uart_tx_char(unsigned long uart_base, char c);
-char uart_rx_char(unsigned long uart_base);
-void uart_init(unsigned long base);
 
 
 #endif

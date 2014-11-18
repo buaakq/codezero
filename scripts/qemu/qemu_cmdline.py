@@ -22,7 +22,7 @@ map_list = (['EB',          'ARM1136',      'realview-eb',          'arm1136'],
             ['EB',          'CORTEXA9',     'realview-pbx-a9',      'cortex-a9'],
             ['PB926',       'ARM926',       'versatilepb',          'arm926'],
             ['BEAGLE',      'CORTEXA8',     'beagle',               'cortex-a8'],
-            ['PBA9',        'CORTEXA9',     'realview-vx-a9',       'cortex-a9'])
+            ['PBA9',        'CORTEXA9',     'realview-vx-a9',       'cortex-a9'],       ['AM1808',       'ARM926',        'versatilepb',       'arm926'    ])
 
 data_up = \
 '''

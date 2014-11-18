@@ -18,7 +18,11 @@ Import('env', 'type', 'build_dir')
 env.Append(CPPPATH = [LIBDEV_INCLUDE, LIBC_INCLUDE, LIBL4_INCLUDE],
            CCFLAGS = ['-DVARIANT_' + type.upper()])
 
-objects     = SConscript('uart/pl011/SConscript',   duplicate=0, exports = { 'env' : env },
+
+objects     = SConscript('uart/8250/SConscript',   duplicate=0, exports = { 'env' : env },
+                         variant_dir = join(build_dir, 'uart/8250'))
+
+objects     += SConscript('uart/pl011/SConscript',   duplicate=0, exports = { 'env' : env },
                          variant_dir = join(build_dir, 'uart/pl011'))
 
 objects     += SConscript('timer/sp804/SConscript', duplicate=0, exports = { 'env' : env },

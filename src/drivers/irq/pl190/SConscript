@@ -11,9 +11,9 @@ platform = config.platform
 src_local = []
 
 # Platforms using pl190
-plat_list = 'pb926'
+plat_list = ['am1808', 'pb926']
 
-if plat_list == platform:
+if platform in plat_list:
     src_local += ['pl190_vic.c']
 
 obj = env.Object(src_local)

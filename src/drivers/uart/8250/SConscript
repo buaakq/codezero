@@ -8,7 +8,7 @@ config = configuration_retrieve()
 platform = config.platform
 
 # Platforms using pl011 uart
-plat_list = ('eb', 'pba9', 'pb926')
+plat_list = ('eb', 'pba9', 'pb926', 'am1808')
 
 # The set of source files associated with this SConscript file.
 src_local = []

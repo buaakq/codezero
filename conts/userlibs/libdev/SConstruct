@@ -33,8 +33,11 @@ env = Environment(CC = config.toolchain_userspace + 'gcc',
 		          ENV = {'PATH' : os.environ['PATH']},
 		          CPPPATH = ['#include', LIBC_INCLUDE, LIBL4_INCLUDE, KERNEL_HEADERS])
 
+objects     = SConscript('uart/8250/SConscript', duplicate=0,
+                         exports = { 'env' : env },
+                         variant_dir = join(builddir, 'uart/8250'))
 
-objects     = SConscript('uart/pl011/SConscript', duplicate=0,
+objects     += SConscript('uart/pl011/SConscript', duplicate=0,
                          exports = { 'env' : env },
                          variant_dir = join(builddir, 'uart/pl011'))
 objects     += SConscript('timer/sp804/SConscript', duplicate=0,

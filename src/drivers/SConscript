@@ -7,6 +7,9 @@ Import('env', 'bdir')
 src_local = []
 objs = []
 
+objs += SConscript("uart/8250/SConscript", exports = { 'env' : env },
+                   duplicate=0, variant_dir = join(bdir, '8250'))
+
 objs += SConscript("uart/pl011/SConscript", exports = { 'env' : env },
                    duplicate=0, variant_dir = join(bdir, 'pl011'))
 

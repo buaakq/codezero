@@ -7,7 +7,9 @@
 /*#include <config.h>
 */
 
-#include <l4/drivers/uart/8250/uart.h>
+#include <dev/uart.h>
+#include <dev/io.h>
+#include "uart.h"
 
 #define UART_LCRVAL UART_LCR_8N1		/* 8 data, 1 stop, no parity */
 #define UART_MCRVAL (UART_MCR_DTR | \
@@ -147,7 +149,6 @@ static int NS16550_tstc (NS16550_t com_port)
 #endif
 */
 
-/*
 unsigned long uart_print_base;
 
 void platform_init(void)
@@ -157,7 +158,9 @@ void platform_init(void)
 #if defined(VARIANT_BAREMETAL)    
     uart_init(uart_print_base);
 #endif
+
+
 }
-*/
+
 
 
