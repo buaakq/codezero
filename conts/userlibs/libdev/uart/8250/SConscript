@@ -10,15 +10,14 @@ from scripts.config.configuration import *
 config = configuration_retrieve()
 platform = config.platform
 
-#Platforms using pl011
-plat_list = ('am1808', 'eb')
+#Platforms using 8250
+plat_list = 'am1808'
 
 # The set of source files associated with this SConscript file.
 src_local = []
 
-for plat_supported in plat_list:
-    if plat_supported == platform:
-        src_local += Glob('*.c')
+if plat_list == platform:
+    src_local += Glob('*.c')
 
 obj = env.StaticObject(src_local)
 Return('obj')
