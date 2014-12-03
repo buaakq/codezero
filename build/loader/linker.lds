@@ -1,0 +1,34 @@
+/*
+ * Loader linker script that contains kernel and container images
+ *
+ * Copyright (C) 2008-2009 B Labs Ltd.
+ */
+
+load_address = 3238526976;
+ENTRY(_start)
+
+SECTIONS
+{
+	. = load_address;
+	_start_loader = .;
+	.text : { *(.text.head) *(.text) }
+	.rodata : { *(.rodata) }
+	.rodata1 : { *(.rodata1) }
+	.data :
+	{
+		_start_kernel = .;
+		*(.kernel)
+		_end_kernel = .;
+
+		_start_containers = .;
+		*(.containers)
+		_end_containers = .;
+        	*(.data)
+	}
+	.got : { *(.got) *(.got.plt) }
+    _bss_start = .;
+	.bss : { *(.bss) }
+    _bss_end = .;
+	_end_loader = .;
+    _stack = 0xc3fffffc;
+}

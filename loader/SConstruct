@@ -56,6 +56,9 @@ objs = SConscript(join(LIBDEV_RELDIR, 'SConscript'), duplicate = 0,
                   exports = { 'env' : env, 'type' : variant, 'build_dir' : libdev_builddir},
                   variant_dir = join(BUILDDIR, LIBDEV_RELDIR))
 
+#add test/*.o
+
+
 objs += SConscript('loader/libs/c/SConscript', duplicate = 0,
                    exports = { 'env' : env, 'type' : variant},
                    variant_dir = join(BUILDDIR, 'loader/libs/c'))
@@ -68,6 +71,11 @@ objs += SConscript('loader/SConscript', duplicate = 0,
                    exports = { 'env' : env },
                    variant_dir = join(BUILDDIR, 'loader'))
 
+objs += env.Object('other/psc.c')
+objs += env.Object('other/startup.c')
+objs += env.Object('other/syscfg.c')
+objs += env.Object('other/exceptionhandler.S')
+objs += env.Object('other/cpu.c')
 #
 # Find the LMA for FINAL_ELF
 # Let size of physical memory hole needed for FINAL_ELF be 16MB

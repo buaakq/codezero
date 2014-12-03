@@ -1,0 +1,7 @@
+
+Import('env')
+
+src = Glob('*.o')
+objs = env.Object(src)
+
+Return('objs')

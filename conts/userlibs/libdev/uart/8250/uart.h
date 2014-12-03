@@ -1,178 +1,253 @@
 /*
- * NS16550 Serial Port
- * originally from linux source (arch/ppc/boot/ns16550.h)
- *
- * Cleanup and unification
- * (C) 2009 by Detlev Zundel, DENX Software Engineering GmbH
- *
- * modified slightly to
- * have addresses as offsets from CONFIG_SYS_ISA_BASE
- * added a few more definitions
- * added prototypes for ns16550.c
- * reduced no of com ports to 2
- * modifications (c) Rob Taylor, Flying Pig Systems. 2000.
- *
- * added support for port on 64-bit bus
- * by Richard Danter (richard.danter@windriver.com), (C) 2005 Wind River Systems
+ * PL011 UART Generic driver implementation.
+ * Copyright Bahadir Balban (C) 2009
  */
+#ifndef __PL011_H__
+#define __PL011_H__
 
-/*
- * Note that the following macro magic uses the fact that the compiler
- * will not allocate storage for arrays of size 0
- */
-#ifndef __8250_H__
-#define __8250_H__
-#define SS8250_BASE 0x01d0d0000
+#include <l4/config.h> /* To get PLATFORM */
+#include <dev/io.h>
 
-#define CONFIG_SYS_NS16550_REG_SIZE -4
-
-#if !defined(CONFIG_SYS_NS16550_REG_SIZE) || (CONFIG_SYS_NS16550_REG_SIZE == 0)
-#error "Please define NS16550 registers size."
-#elif (CONFIG_SYS_NS16550_REG_SIZE > 0)
-#define UART_REG(x)						   \
-	unsigned char prepad_##x[CONFIG_SYS_NS16550_REG_SIZE - 1]; \
-	unsigned char x;
-#elif (CONFIG_SYS_NS16550_REG_SIZE < 0)
-#define UART_REG(x)							\
-	unsigned char x;						\
-	unsigned char postpad_##x[-CONFIG_SYS_NS16550_REG_SIZE - 1];
+#if defined(VARIANT_USERSPACE)
+#include <l4/macros.h>
+#include INC_ARCH(io.h)
+#define PL011_BASE		USERSPACE_CONSOLE_VBASE
 #endif
 
-struct NS16550 {
-	UART_REG(rbr);		/* 0 */
-	UART_REG(ier);		/* 1 */
-	UART_REG(fcr);		/* 2 */
-	UART_REG(lcr);		/* 3 */
-	UART_REG(mcr);		/* 4 */
-	UART_REG(lsr);		/* 5 */
-	UART_REG(msr);		/* 6 */
-	UART_REG(spr);		/* 7 */
-	UART_REG(mdr1);		/* 8 */
-	UART_REG(reg9);		/* 9 */
-	UART_REG(regA);		/* A */
-	UART_REG(regB);		/* B */
-	UART_REG(regC);		/* C */
-	UART_REG(regD);		/* D */
-	UART_REG(regE);		/* E */
-	UART_REG(uasr);		/* F */
-	UART_REG(scr);		/* 10*/
-	UART_REG(ssr);		/* 11*/
-	UART_REG(reg12);	/* 12*/
-	UART_REG(osc_12m_sel);	/* 13*/
-};
-
-#define thr rbr
-#define iir fcr
-#define dll rbr
-#define dlm ier
-
-typedef volatile struct NS16550 *NS16550_t;
-
-/*
- * These are the definitions for the FIFO Control Register
- */
-#define UART_FCR_FIFO_EN 	0x01 /* Fifo enable */
-#define UART_FCR_CLEAR_RCVR	0x02 /* Clear the RCVR FIFO */
-#define UART_FCR_CLEAR_XMIT	0x04 /* Clear the XMIT FIFO */
-#define UART_FCR_DMA_SELECT	0x08 /* For DMA applications */
-#define UART_FCR_TRIGGER_MASK	0xC0 /* Mask for the FIFO trigger range */
-#define UART_FCR_TRIGGER_1	0x00 /* Mask for trigger set at 1 */
-#define UART_FCR_TRIGGER_4	0x40 /* Mask for trigger set at 4 */
-#define UART_FCR_TRIGGER_8	0x80 /* Mask for trigger set at 8 */
-#define UART_FCR_TRIGGER_14	0xC0 /* Mask for trigger set at 14 */
-
-#define UART_FCR_RXSR		0x02 /* Receiver soft reset */
-#define UART_FCR_TXSR		0x04 /* Transmitter soft reset */
-
-/*
- * These are the definitions for the Modem Control Register
- */
-#define UART_MCR_DTR	0x01		/* DTR   */
-#define UART_MCR_RTS	0x02		/* RTS   */
-#define UART_MCR_OUT1	0x04		/* Out 1 */
-#define UART_MCR_OUT2	0x08		/* Out 2 */
-#define UART_MCR_LOOP	0x10		/* Enable loopback test mode */
-
-#define UART_MCR_DMA_EN	0x04
-#define UART_MCR_TX_DFR	0x08
-
-/*
- * These are the definitions for the Line Control Register
- *
- * Note: if the word length is 5 bits (UART_LCR_WLEN5), then setting
- * UART_LCR_STOP will select 1.5 stop bits, not 2 stop bits.
- */
-#define UART_LCR_WLS_MSK 0x03		/* character length select mask */
-#define UART_LCR_WLS_5	0x00		/* 5 bit character length */
-#define UART_LCR_WLS_6	0x01		/* 6 bit character length */
-#define UART_LCR_WLS_7	0x02		/* 7 bit character length */
-#define UART_LCR_WLS_8	0x03		/* 8 bit character length */
-#define UART_LCR_STB	0x04		/* Number of stop Bits, off = 1, on = 1.5 or 2) */
-#define UART_LCR_PEN	0x08		/* Parity eneble */
-#define UART_LCR_EPS	0x10		/* Even Parity Select */
-#define UART_LCR_STKP	0x20		/* Stick Parity */
-#define UART_LCR_SBRK	0x40		/* Set Break */
-#define UART_LCR_BKSE	0x80		/* Bank select enable */
-#define UART_LCR_DLAB	0x80		/* Divisor latch access bit */
-
-/*
- * These are the definitions for the Line Status Register
- */
-#define UART_LSR_DR	0x01		/* Data ready */
-#define UART_LSR_OE	0x02		/* Overrun */
-#define UART_LSR_PE	0x04		/* Parity error */
-#define UART_LSR_FE	0x08		/* Framing error */
-#define UART_LSR_BI	0x10		/* Break */
-#define UART_LSR_THRE	0x20		/* Xmit holding register empty */
-#define UART_LSR_TEMT	0x40		/* Xmitter empty */
-#define UART_LSR_ERR	0x80		/* Error */
-
-#define UART_MSR_DCD	0x80		/* Data Carrier Detect */
-#define UART_MSR_RI	0x40		/* Ring Indicator */
-#define UART_MSR_DSR	0x20		/* Data Set Ready */
-#define UART_MSR_CTS	0x10		/* Clear to Send */
-#define UART_MSR_DDCD	0x08		/* Delta DCD */
-#define UART_MSR_TERI	0x04		/* Trailing edge ring indicator */
-#define UART_MSR_DDSR	0x02		/* Delta DSR */
-#define UART_MSR_DCTS	0x01		/* Delta CTS */
-
-/*
- * These are the definitions for the Interrupt Identification Register
- */
-#define UART_IIR_NO_INT	0x01	/* No interrupts pending */
-#define UART_IIR_ID	0x06	/* Mask for the interrupt ID */
-
-#define UART_IIR_MSI	0x00	/* Modem status interrupt */
-#define UART_IIR_THRI	0x02	/* Transmitter holding register empty */
-#define UART_IIR_RDI	0x04	/* Receiver data interrupt */
-#define UART_IIR_RLSI	0x06	/* Receiver line status interrupt */
-
-/*
- * These are the definitions for the Interrupt Enable Register
- */
-#define UART_IER_MSI	0x08	/* Enable Modem status interrupt */
-#define UART_IER_RLSI	0x04	/* Enable receiver line status interrupt */
-#define UART_IER_THRI	0x02	/* Enable Transmitter holding register int. */
-#define UART_IER_RDI	0x01	/* Enable receiver data interrupt */
-
-
-#ifdef CONFIG_OMAP1510
-#define OSC_12M_SEL	0x01	/* selects 6.5 * current clk div */
+#if defined(VARIANT_BAREMETAL)
+#if defined(CONFIG_PLATFORM_PB926)
+#define PL011_BASE		0x101F1000
+#elif defined(CONFIG_PLATFORM_EB) || defined(CONFIG_PLATFORM_PBA9)
+#define PL011_BASE              0x10009000
+#endif
 #endif
 
-/* useful defaults for LCR */
-#define UART_LCR_8N1	0x03
+/* Register offsets */
+#define PL011_UARTDR		0x00
+#define PL011_UARTRSR		0x04
+#define PL011_UARTECR		0x04
+#define PL011_UARTFR		0x18
+#define PL011_UARTILPR		0x20
+#define PL011_UARTIBRD		0x24
+#define PL011_UARTFBRD		0x28
+#define PL011_UARTLCR_H		0x2C
+#define PL011_UARTCR		0x30
+#define PL011_UARTIFLS		0x34
+#define PL011_UARTIMSC		0x38
+#define PL011_UARTRIS		0x3C
+#define PL011_UARTMIS		0x40
+#define PL011_UARTICR		0x44
+#define PL011_UARTDMACR		0x48
+
+/* IRQ bits for each uart irq event */
+#define PL011_RXIRQ		(1 << 4)
+#define PL011_TXIRQ		(1 << 5)
+#define PL011_RXTIMEOUTIRQ	(1 << 6)
+#define PL011_FEIRQ		(1 << 7)
+#define PL011_PEIRQ		(1 << 8)
+#define PL011_BEIRQ		(1 << 9)
+#define PL011_OEIRQ		(1 << 10)
+
+
+void pl011_set_baudrate(unsigned long base, unsigned int baud,
+			unsigned int clkrate);
+
+#define PL011_UARTEN	(1 << 0)
+static inline void pl011_uart_enable(unsigned long base)
+{
+	unsigned int val = 0;
+
+	val = read((base + PL011_UARTCR));
+	val |= PL011_UARTEN;
+	write(val, (base + PL011_UARTCR));
+
+	return;
+}
+
+static inline void pl011_uart_disable(unsigned long base)
+{
+	unsigned int val = 0;
+
+	val = read((base + PL011_UARTCR));
+	val &= ~PL011_UARTEN;
+	write(val, (base + PL011_UARTCR));
+
+	return;
+}
+
+#define PL011_TXE	(1 << 8)
+static inline void pl011_tx_enable(unsigned long base)
+{
+	unsigned int val = 0;
+
+	val = read((base + PL011_UARTCR));
+	val |= PL011_TXE;
+	write(val, (base + PL011_UARTCR));
+	return;
+}
+
+static inline void pl011_tx_disable(unsigned long base)
+{
+	unsigned int val = 0;
+
+	val =read((base + PL011_UARTCR));
+	val &= ~PL011_TXE;
+	write(val, (base + PL011_UARTCR));
+	return;
+}
+
+#define PL011_RXE	(1 << 9)
+static inline void pl011_rx_enable(unsigned long base)
+{
+	unsigned int val = 0;
+
+	val = read((base + PL011_UARTCR));
+	val |= PL011_RXE;
+	write(val, (base + PL011_UARTCR));
+	return;
+}
+
+static inline void pl011_rx_disable(unsigned long base)
+{
+	unsigned int val = 0;
+
+	val = read((base + PL011_UARTCR));
+	val &= ~PL011_RXE;
+	write(val, (base + PL011_UARTCR));
+	return;
+}
+
+#define PL011_TWO_STOPBITS_SELECT	(1 << 3)
+static inline void pl011_set_stopbits(unsigned long base, int stopbits)
+{
+	unsigned int val = 0;
+
+	val = read((base + PL011_UARTLCR_H));
+
+	if(stopbits == 2) {			/* Set to two bits */
+		val |= PL011_TWO_STOPBITS_SELECT;
+	} else {				/* Default is 1 */
+		val &= ~PL011_TWO_STOPBITS_SELECT;
+	}
+	write(val, (base + PL011_UARTLCR_H));
+	return;
+}
+
+#define PL011_PARITY_ENABLE	(1 << 1)
+static inline void pl011_parity_enable(unsigned long base)
+{
+	unsigned int val = 0;
+
+	val = read((base +PL011_UARTLCR_H));
+	val |= PL011_PARITY_ENABLE;
+	write(val, (base + PL011_UARTLCR_H));
+	return;
+}
+
+static inline void pl011_parity_disable(unsigned long base)
+{
+	unsigned int val = 0;
+
+	val = read((base + PL011_UARTLCR_H));
+	val &= ~PL011_PARITY_ENABLE;
+	write(val, (base + PL011_UARTLCR_H));
+	return;
+}
+
+#define PL011_PARITY_EVEN	(1 << 2)
+static inline void pl011_set_parity_even(unsigned long base)
+{
+	unsigned int val = 0;
+
+	val = read((base + PL011_UARTLCR_H));
+	val |= PL011_PARITY_EVEN;
+	write(val, (base + PL011_UARTLCR_H));
+	return;
+}
+
+static inline void pl011_set_parity_odd(unsigned long base)
+{
+	unsigned int val = 0;
+
+	val = read((base + PL011_UARTLCR_H));
+	val &= ~PL011_PARITY_EVEN;
+	write(val, (base + PL011_UARTLCR_H));
+	return;
+}
+
+#define	PL011_ENABLE_FIFOS	(1 << 4)
+static inline void pl011_enable_fifos(unsigned long base)
+{
+	unsigned int val = 0;
+
+	val = read((base + PL011_UARTLCR_H));
+	val |= PL011_ENABLE_FIFOS;
+	write(val, (base + PL011_UARTLCR_H));
+	return;
+}
+
+static inline void pl011_disable_fifos(unsigned long base)
+{
+	unsigned int val = 0;
+
+	val = read((base + PL011_UARTLCR_H));
+	val &= ~PL011_ENABLE_FIFOS;
+	write(val, (base + PL011_UARTLCR_H));
+	return;
+}
+
+/* Sets the transfer word width for the data register. */
+static inline void pl011_set_word_width(unsigned long base, int size)
+{
+	unsigned int val = 0;
+	if(size < 5 || size > 8)	/* Default is 8 */
+		size = 8;
+
+	/* Clear size field */
+	val = read((base + PL011_UARTLCR_H));
+	val &= ~(0x3 << 5);
+	write(val, (base + PL011_UARTLCR_H));
+
+	/*
+	 * The formula is to write 5 less of size given:
+	 * 11 = 8 bits
+	 * 10 = 7 bits
+	 * 01 = 6 bits
+	 * 00 = 5 bits
+	 */
+	val = read((base + PL011_UARTLCR_H));
+	val |= (size - 5) << 5;
+	write(val, (base + PL011_UARTLCR_H));
+
+	return;
+}
 
 /*
-void	NS16550_init   (NS16550_t com_port, int baud_divisor);
-void	NS16550_putc   (NS16550_t com_port, char c);
-char	NS16550_getc   (NS16550_t com_port);
-int	NS16550_tstc   (NS16550_t com_port);
-void	NS16550_reinit (NS16550_t com_port, int baud_divisor);
-*/
+ * Defines at which level of fifo fullness an irq will be generated.
+ * @xfer: tx fifo = 0, rx fifo = 1
+ * @level: Generate irq if:
+ * 0	rxfifo >= 1/8 full  	txfifo <= 1/8 full
+ * 1	rxfifo >= 1/4 full  	txfifo <= 1/4 full
+ * 2	rxfifo >= 1/2 full  	txfifo <= 1/2 full
+ * 3	rxfifo >= 3/4 full	txfifo <= 3/4 full
+ * 4	rxfifo >= 7/8 full	txfifo <= 7/8 full
+ * 5-7	reserved		reserved
+ */
+static inline void pl011_set_irq_fifolevel(unsigned long base, \
+			unsigned int xfer, unsigned int level)
+{
+	if(xfer != 1 && xfer != 0)	/* Invalid fifo */
+		return;
+	if(level > 4)			/* Invalid level */
+		return;
 
+	write(level << (xfer * 3), (base + PL011_UARTIFLS));
+	return;
+}
 
+#define SS8250_BASE (0x01d0d000)
 
-#endif
+extern void test_my_uart(void);
 
+#endif /* __PL011__UART__ */
 

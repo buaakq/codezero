@@ -26,6 +26,9 @@ SECTIONS
         	*(.data)
 	}
 	.got : { *(.got) *(.got.plt) }
+    _bss_start = .;
 	.bss : { *(.bss) }
+    _bss_end = .;
 	_end_loader = .;
+    _stack = 0xc3fffffc;
 }

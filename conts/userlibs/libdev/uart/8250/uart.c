@@ -1,166 +1,133 @@
 /*
- * COM1 NS16550 support
- * originally from linux source (arch/ppc/boot/ns16550.c)
- * modified to use CONFIG_SYS_ISA_MEM and new defines
+ * PL011 UART driver
+ *
+ * Copyright (C) 2009 B Labs Ltd.
  */
-
-/*#include <config.h>
-*/
-
 #include <dev/uart.h>
 #include <dev/io.h>
 #include "uart.h"
 
-#define UART_LCRVAL UART_LCR_8N1		/* 8 data, 1 stop, no parity */
-#define UART_MCRVAL (UART_MCR_DTR | \
-		     UART_MCR_RTS)		/* RTS/DTR */
-#define UART_FCRVAL (UART_FCR_FIFO_EN |	\
-		     UART_FCR_RXSR |	\
-		     UART_FCR_TXSR)		/* Clear & enable FIFOs */
+/* Error status bits in receive status register */
+#define PL011_FE		(1 << 0)
+#define PL011_PE		(1 << 1)
+#define PL011_BE		(1 << 2)
+#define PL011_OE		(1 << 3)
 
-#define MODE_X_DIV 16
+/* Status bits in flag register */
+#define PL011_TXFE		(1 << 7)
+#define PL011_RXFF		(1 << 6)
+#define PL011_TXFF		(1 << 5)
+#define PL011_RXFE		(1 << 4)
+#define PL011_BUSY		(1 << 3)
+#define PL011_DCD		(1 << 2)
+#define PL011_DSR		(1 << 1)
+#define PL011_CTS		(1 << 0)
 
-static long  cal_divisor(unsigned int baudrate);
-static long  cal_divisor(unsigned int baudrate);
-static void NS16550_init (NS16550_t com_port, unsigned int baud_divisor);
-static void NS16550_putc (NS16550_t com_port, char c); 
-static char NS16550_getc (NS16550_t com_port);
+void uart_tx_char(unsigned long base, char c)
+{
+	unsigned int val = 0;
+
+	do {
+		val = read((base + PL011_UARTFR));
+	} while (val & PL011_TXFF);  /* TX FIFO FULL */
+
+	write(c, (base + PL011_UARTDR));
+}
+
+char uart_rx_char(unsigned long base)
+{
+	unsigned int val = 0;
+
+	do {
+		val = read(base + PL011_UARTFR);
+	} while (val & PL011_RXFE); /* RX FIFO Empty */
+
+	return (char)read((base + PL011_UARTDR));
+}
+
+/*
+ * Sets the baud rate in kbps. It is recommended to use
+ * standard rates such as: 1200, 2400, 3600, 4800, 7200,
+ * 9600, 14400, 19200, 28800, 38400, 57600 76800, 115200.
+ */
+void pl011_set_baudrate(unsigned long base, unsigned int baud,
+			unsigned int clkrate)
+{
+	const unsigned int uartclk = 24000000;	/* 24Mhz clock fixed on pb926 */
+	unsigned int val = 0, ipart = 0, fpart = 0;
+
+	/* Use default pb926 rate if no rate is supplied */
+	if (clkrate == 0)
+		clkrate = uartclk;
+	if (baud > 115200 || baud < 1200)
+		baud = 38400;	/* Default rate. */
+
+	/* 24000000 / (38400 * 16) */
+	ipart = 39;
+
+	write(ipart, base + PL011_UARTIBRD);
+	write(fpart, base + PL011_UARTFBRD);
+
+	/*
+	 * For the IBAUD and FBAUD to update, we need to
+	 * write to UARTLCR_H because the 3 registers are
+	 * actually part of a single register in hardware
+	 * which only updates by a write to UARTLCR_H
+	 */
+	val = read(base + PL011_UARTLCR_H);
+	write(val, base + PL011_UARTLCR_H);
+
+}
 
 void uart_init(unsigned long uart_base)
 {
-    unsigned int baud_divisor, baudrate = 115200;
-    baud_divisor = cal_divisor(baudrate);
-    NS16550_init((NS16550_t)uart_base, baud_divisor);
-}
+	/* Initialise data register for 8 bit data read/writes */
+	pl011_set_word_width(uart_base, 8);
 
-char uart_rx_char(unsigned long uart_base)
-{
-    return NS16550_getc((NS16550_t)uart_base);
-}
+	/*
+	 * Fifos are disabled because by default it is assumed the port
+	 * will be used as a user terminal, and in that case the typed
+	 * characters will only show up when fifos are flushed, rather than
+	 * when each character is typed. We avoid this by not using fifos.
+	 */
+	pl011_disable_fifos(uart_base);
 
-void uart_tx_char(unsigned long uart_base, char c)
-{
-    NS16550_putc((NS16550_t)uart_base, c);
-}
+	/* Set default baud rate of 38400 */
+	pl011_set_baudrate(uart_base, 38400, 24000000);
 
-void uart_set_baudrate(unsigned long uart_base, unsigned int val)
-{
-    unsigned int baud_divisor;
-    baud_divisor = cal_divisor(val);
-    NS16550_t com_port = (NS16550_t)uart_base;
-    
-	com_port->dll = baud_divisor & 0xff;
-	com_port->dlm = (baud_divisor >> 8) & 0xff;
-}
+	/* Set default settings of 1 stop bit, no parity, no hw flow ctrl */
+	pl011_set_stopbits(uart_base, 1);
+	pl011_parity_disable(uart_base);
 
-static long  cal_divisor(unsigned int baudrate)
-{
-    const unsigned int clk = 24000000;
-    return (clk + (baudrate * (MODE_X_DIV / 2))) / (MODE_X_DIV * baudrate);   
+	/* Enable rx, tx, and uart chip */
+	pl011_tx_enable(uart_base);
+	pl011_rx_enable(uart_base);
+	pl011_uart_enable(uart_base);
 }
-
-static void NS16550_init (NS16550_t com_port, unsigned int baud_divisor)
-{
-	com_port->ier = 0x00;
-/*
-#if defined(CONFIG_OMAP) && !defined(CONFIG_OMAP3_ZOOM2)
-	com_port->mdr1 = 0x7;	
-#endif
-*/
-	com_port->lcr = UART_LCR_BKSE | UART_LCRVAL;
-	com_port->dll = 0;
-	com_port->dlm = 0;
-	com_port->lcr = UART_LCRVAL;
-	com_port->mcr = UART_MCRVAL;
-	com_port->fcr = UART_FCRVAL;
-	com_port->lcr = UART_LCR_BKSE | UART_LCRVAL;
-	com_port->dll = baud_divisor & 0xff;
-	com_port->dlm = (baud_divisor >> 8) & 0xff;
-	com_port->lcr = UART_LCRVAL;
-/*
-#if defined(CONFIG_OMAP) && !defined(CONFIG_OMAP3_ZOOM2)
-#if defined(CONFIG_APTIX)
-	com_port->mdr1 = 3;	
-#else
-	com_port->mdr1 = 0;	
-#endif
-#endif 
-*/
-}
-
-/*
-#ifndef CONFIG_NS16550_MIN_FUNCTIONS
-*/
-/*
-static void NS16550_reinit (NS16550_t com_port, int baud_divisor)
-{
-	com_port->ier = 0x00;
-	com_port->lcr = UART_LCR_BKSE | UART_LCRVAL;
-	com_port->dll = 0;
-	com_port->dlm = 0;
-	com_port->lcr = UART_LCRVAL;
-	com_port->mcr = UART_MCRVAL;
-	com_port->fcr = UART_FCRVAL;
-	com_port->lcr = UART_LCR_BKSE;
-	com_port->dll = baud_divisor & 0xff;
-	com_port->dlm = (baud_divisor >> 8) & 0xff;
-	com_port->lcr = UART_LCRVAL;
-}
-*/
-/*
-#endif
-*/
-/* CONFIG_NS16550_MIN_FUNCTIONS */
-
-static void NS16550_putc (NS16550_t com_port, char c)
-{
-	while ((com_port->lsr & UART_LSR_THRE) == 0);
-	com_port->thr = c;
-}
-
-/*
-#ifndef CONFIG_NS16550_MIN_FUNCTIONS
-*/
-static char NS16550_getc (NS16550_t com_port)
-{
-	while ((com_port->lsr & UART_LSR_DR) == 0) {
-/*
-#ifdef CONFIG_USB_TTY
-*/
-/*
-        extern void usbtty_poll(void);
-		usbtty_poll();
-*/
-/*
-#endif
-*/
-	}
-	return (com_port->rbr);
-}
-
-/*
-static int NS16550_tstc (NS16550_t com_port)
-{
-	return ((com_port->lsr & UART_LSR_DR) != 0);
-}
-*/
-
-/*
-#endif
-*/
 
 unsigned long uart_print_base;
 
 void platform_init(void)
 {
-    uart_print_base = SS8250_BASE ;
+    test_my_uart();
 
-#if defined(VARIANT_BAREMETAL)    
-    uart_init(uart_print_base);
+    /*
+    UARTConsoleInit();
+    UARTCharPut(SS8250_BASE, 'A');
+    UARTCharPut(SS8250_BASE, 'A');
+	uart_print_base = PL011_BASE;
+    */
+	/*
+	 * We dont need to initialize uart here for variant-userspace,
+	 * as this is the same uart as used by kernel and hence
+	 * already initialized, we just need
+	 * a uart struct instance with proper base address.
+	 *
+	 * But in case of baremetal like loader, no one has done
+	 * initialization, so we need to do it.
+	 */
+#if defined(VARIANT_BAREMETAL)
+	uart_init(uart_print_base);
 #endif
-
-
 }
-
-
 

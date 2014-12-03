@@ -9,6 +9,7 @@
 
 #include <l4/generic/resource.h>
 
+unsigned int start_boot(void);
 void platform_init(void);
 
 /* IRQ controller */

@@ -1,116 +1,127 @@
-/*
- * Australian Public Licence B (OZPLB)
- * 
- * Version 1-0
- * 
- * Copyright (c) 2004 National ICT Australia
- * 
- * All rights reserved. 
- * 
- * Developed by: Embedded, Real-time and Operating Systems Program (ERTOS)
- *               National ICT Australia
- *               http://www.ertos.nicta.com.au
- * 
- * Permission is granted by National ICT Australia, free of charge, to
- * any person obtaining a copy of this software and any associated
- * documentation files (the "Software") to deal with the Software without
- * restriction, including (without limitation) the rights to use, copy,
- * modify, adapt, merge, publish, distribute, communicate to the public,
- * sublicense, and/or sell, lend or rent out copies of the Software, and
- * to permit persons to whom the Software is furnished to do so, subject
- * to the following conditions:
- * 
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimers.
- * 
- *     * Redistributions in binary form must reproduce the above
- *       copyright notice, this list of conditions and the following
- *       disclaimers in the documentation and/or other materials provided
- *       with the distribution.
- * 
- *     * Neither the name of National ICT Australia, nor the names of its
- *       contributors, may be used to endorse or promote products derived
- *       from this Software without specific prior written permission.
- * 
- * EXCEPT AS EXPRESSLY STATED IN THIS LICENCE AND TO THE FULL EXTENT
- * PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED "AS-IS", AND
- * NATIONAL ICT AUSTRALIA AND ITS CONTRIBUTORS MAKE NO REPRESENTATIONS,
- * WARRANTIES OR CONDITIONS OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
- * BUT NOT LIMITED TO ANY REPRESENTATIONS, WARRANTIES OR CONDITIONS
- * REGARDING THE CONTENTS OR ACCURACY OF THE SOFTWARE, OR OF TITLE,
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NONINFRINGEMENT,
- * THE ABSENCE OF LATENT OR OTHER DEFECTS, OR THE PRESENCE OR ABSENCE OF
- * ERRORS, WHETHER OR NOT DISCOVERABLE.
- * 
- * TO THE FULL EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL
- * NATIONAL ICT AUSTRALIA OR ITS CONTRIBUTORS BE LIABLE ON ANY LEGAL
- * THEORY (INCLUDING, WITHOUT LIMITATION, IN AN ACTION OF CONTRACT,
- * NEGLIGENCE OR OTHERWISE) FOR ANY CLAIM, LOSS, DAMAGES OR OTHER
- * LIABILITY, INCLUDING (WITHOUT LIMITATION) LOSS OF PRODUCTION OR
- * OPERATION TIME, LOSS, DAMAGE OR CORRUPTION OF DATA OR RECORDS; OR LOSS
- * OF ANTICIPATED SAVINGS, OPPORTUNITY, REVENUE, PROFIT OR GOODWILL, OR
- * OTHER ECONOMIC LOSS; OR ANY SPECIAL, INCIDENTAL, INDIRECT,
- * CONSEQUENTIAL, PUNITIVE OR EXEMPLARY DAMAGES, ARISING OUT OF OR IN
- * CONNECTION WITH THIS LICENCE, THE SOFTWARE OR THE USE OF OR OTHER
- * DEALINGS WITH THE SOFTWARE, EVEN IF NATIONAL ICT AUSTRALIA OR ITS
- * CONTRIBUTORS HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH CLAIM, LOSS,
- * DAMAGES OR OTHER LIABILITY.
- * 
- * If applicable legislation implies representations, warranties, or
- * conditions, or imposes obligations or liability on National ICT
- * Australia or one of its contributors in respect of the Software that
- * cannot be wholly or partly excluded, restricted or modified, the
- * liability of National ICT Australia or the contributor is limited, to
- * the full extent permitted by the applicable legislation, at its
- * option, to:
- * a.  in the case of goods, any one or more of the following:
- * i.  the replacement of the goods or the supply of equivalent goods;
- * ii.  the repair of the goods;
- * iii. the payment of the cost of replacing the goods or of acquiring
- *  equivalent goods;
- * iv.  the payment of the cost of having the goods repaired; or
- * b.  in the case of services:
- * i.  the supplying of the services again; or
- * ii.  the payment of the cost of having the services supplied again.
- * 
- * The construction, validity and performance of this licence is governed
- * by the laws in force in New South Wales, Australia.
- */
-#include INC_PLAT(offsets.h)
-#include INC_ARCH(scu.h)
-#include INC_ARCH(asm.h)
-#include INC_ARCH(asm-macros.S)
+@******************************************************************************
+@
+@ init.S - Init code routines
+@
+@ Copyright (C) 2010 Texas Instruments Incorporated - http://www.ti.com/
+@ All rights reserved.
+@
+@******************************************************************************
 
+@****************************** Global Symbols*********************************
+        .global _stack                  
+        .global _bss_start
+        .global _bss_end
+        .global start_boot
 
-	.section .text
-	.code 32
-	.global _start;
-	.align;
+@************************ Internal Definitions ********************************
+@
+@ Define the stack sizes for different modes. The user/system mode will use
+@ the rest of the total stack size
+@
+        .set  UND_STACK_SIZE, 0x8
+        .set  ABT_STACK_SIZE, 0x8
+        .set  FIQ_STACK_SIZE, 0x8
+        .set  IRQ_STACK_SIZE, 0x500
+        .set  SVC_STACK_SIZE, 0x8
+
+@
+@ to set the mode bits in CPSR for different modes
+@        
+        .set  MODE_USR, 0x10            
+        .set  MODE_FIQ, 0x11
+        .set  MODE_IRQ, 0x12
+        .set  MODE_SVC, 0x13
+        .set  MODE_ABT, 0x17
+        .set  MODE_UND, 0x1B
+        .set  MODE_SYS, 0x1F            
+
+        .equ  I_F_BIT, 0xC0               
+
+@**************************** Code Seection ***********************************
+        .text
+
+@
+@ This code is assembled for ARM instructions
+@
+        .code 32
+        .global _start
+        .align
+
+@******************************************************************************
+@
+@******************************************************************************
+@
+@ The reset handler sets up the stack pointers for all the modes. The FIQ and
+@ IRQ shall be disabled during this. Then, clearthe BSS sections, switch to the
+@ main() function. 
+@
+@Entry:
 _start:
-	ldr	sp, 1f
+@
+@ Set up the Stack for Undefined mode
+@
+         LDR   r0, =_stack                     @ Read the stack address
+         MSR   cpsr_c, #MODE_UND|I_F_BIT       @ switch to undef  mode
+         MOV   sp,r0                           @ write the stack pointer
+         SUB   r0, r0, #UND_STACK_SIZE         @ give stack space
+@
+@ Set up the Stack for abort mode
+@        
+         MSR   cpsr_c, #MODE_ABT|I_F_BIT       @ Change to abort mode
+         MOV   sp, r0                          @ write the stack pointer
+         SUB   r0,r0, #ABT_STACK_SIZE          @ give stack space
+@
+@ Set up the Stack for FIQ mode
+@       
+         MSR   cpsr_c, #MODE_FIQ|I_F_BIT       @ change to FIQ mode
+         MOV   sp,r0                           @ write the stack pointer
+         SUB   r0,r0, #FIQ_STACK_SIZE          @ give stack space
+@
+@ Set up the Stack for IRQ mode
+@       
+         MSR   cpsr_c, #MODE_IRQ|I_F_BIT       @ change to IRQ mode
+         MOV   sp,r0                           @ write the stack pointer
+         SUB   r0,r0, #IRQ_STACK_SIZE          @ give stack space
+@
+@ Set up the Stack for SVC mode
+@        
+         MSR   cpsr_c, #MODE_SVC|I_F_BIT       @ change to SVC mode
+         MOV   sp,r0                           @ write the stack pointer
+         SUB   r0,r0, #SVC_STACK_SIZE          @ give stack space
+@
+@ Set up the Stack for USer/System mode
+@      
+         MSR   cpsr_c, #MODE_SYS|I_F_BIT       @ change to system mode
+         MOV   sp,r0                           @ write the stack pointer
 
-#if defined(CONFIG_SMP)
-	/* In case all cores start executing at _start */
-	get_cpuid	r0
-	teq	r0, #0
-	beq	core0
-wfiloop:				/* Secondary cores wait here */
-	mov	r0, #0x10000000		/* System Controller base */
-	orr	r0, r0, #0x30
-	ldr	r1, [r0]
-	teq	r1, #0
-	wfeeq
-	beq	wfiloop
-	mov	pc, r1			/* Jump to the address specified */
-#endif
+@
+@ Clear the BSS section here
+@
+Clear_Bss_Section:
 
-core0:	
-	bl	platform_init
-	bl	main
-1:	.word	_stack_top
+         LDR   r0, =_bss_start                 @ Start address of BSS
+         LDR   r1, =(_bss_end - 0x04)          @ End address of BSS
+         MOV   r2, #0  
+Loop: 
+         STR   r2, [r0], #4                    @ Clear one word in BSS
+         CMP   r0, r1
+         BLE   Loop                            @ Clear till BSS end
 
-	.bss
-	.align
-_stack:
-	.space	1024
-_stack_top:
+@
+@ Enter the start_boot function. The execution still happens in system mode
+@
+@Enter_main:
+         LDR   r10,=start_boot                 @ Get the address of start_boot
+         MOV   lr,pc                           @ Dummy return 
+         BX    r10                             @ Branch to start_boot
+         SUB   pc, pc, #0x08                   @ looping   
+
+@
+@ End of the file
+@
+         .end
+    
+    
+
+
+

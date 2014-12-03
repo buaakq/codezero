@@ -1093,6 +1093,8 @@ def compile(debug, arguments, profile, endtok=None):
                             derived_type = "string"
                 elif type(entry.default) is type(0):
                     derived_type = "decimal"		# Could be hex
+                elif type(entry.default) is type(1L):
+                    derived_type = "decimal"
                 elif type(entry.default) is type(""):
                     derived_type = "string"
                 elif isinstance(entry.default, cml.ConfigSymbol):

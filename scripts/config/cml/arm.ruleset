@@ -246,7 +246,7 @@ require NCPU <= 4
 # Derive Ram base address depending on platform selected
 # we use this in setting containers physical regions
 # default values
-derive RAM_BASE_PLAT from 0
+derive RAM_BASE_PLAT from 0xc0280000
 
 # Toolchains:
 default TOOLCHAIN_USERSPACE from 'arm-none-linux-gnueabi-'
