@@ -60,7 +60,7 @@ __initdata struct container_info cinfo[] = {
 			.rw_pheader_start = 0xa0002000L,
 			.rw_pheader_end = 0xa0003048L,
 			.rx_pheader_start = 0xa0000000L,
-			.rx_pheader_end = 0xa0001780L,
+			.rx_pheader_end = 0xa0001784L,
 			.ncaps = 10,
 			.caps = {
 

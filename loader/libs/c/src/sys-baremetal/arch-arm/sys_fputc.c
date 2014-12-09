@@ -7,10 +7,12 @@
 #include <l4/config.h>
 #include <dev/uart.h>
 
+void UARTCharPut(unsigned int, char);
+
 int __fputc(int c, FILE *stream)
 {
-	uart_tx_char(uart_print_base, c);
-
+	/*uart_tx_char(uart_print_base, c);*/
+    UARTCharPut(0x01d0d000, c+'\0');
 	return 0;
 }
 

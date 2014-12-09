@@ -137,7 +137,8 @@ unsigned int start_boot(void)
    /* Calling the main */
     platform_init();
 
-    while(1);
+    /*while(1);*/
+    return 0;
 }
 
 

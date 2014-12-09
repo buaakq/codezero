@@ -7,9 +7,6 @@
 @
 @******************************************************************************
 
-
-
-
 @****************************** Global Symbols*********************************
         .global _stack                  
         .global _bss_start
@@ -114,23 +111,17 @@ Loop:
 @ Enter the start_boot function. The execution still happens in system mode
 @
 @Enter_main:
-@         LDR   r10,=start_boot            @ Get the address of start_boot
-@         MOV   lr,pc                           @ Dummy return 
-@         BX    r10                             @ Branch to start_boot
-@         SUB   pc, pc, #0x08                   @ looping   
-
-core0:
-    bl start_boot
-    bl main
-
-1: .word _stack_top
-   .bss
-   .align
-
-_stack:
-    .space 1024
-_stack_top:
+         LDR   r10,=start_boot                 @ Get the address of start_boot
+         MOV   lr,pc                           @ Dummy return 
+         BX    r10                             @ Branch to start_boot
+         SUB   pc, pc, #0x08                   @ looping   
 
 @
 @ End of the file
 @
+         .end
+    
+    
+
+
+

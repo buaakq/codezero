@@ -126,8 +126,10 @@ void platform_init(void)
 	 * But in case of baremetal like loader, no one has done
 	 * initialization, so we need to do it.
 	 */
+/*
 #if defined(VARIANT_BAREMETAL)
-	uart_init(uart_print_base);
+    uart_init(uart_print_base);
 #endif
+*/
 }
 

@@ -188,7 +188,11 @@ void test_my_uart()
 {
     UARTConsoleInit();
     UARTCharPut(SS8250_BASE, 'A');
-    UARTCharPut(SS8250_BASE, 'A');
+}
+
+void init_my_uart()
+{
+    UARTConsoleInit();
 }
 
 /********************************* End Of File ******************************/

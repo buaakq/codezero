@@ -247,7 +247,7 @@ static inline void pl011_set_irq_fifolevel(unsigned long base, \
 
 #define SS8250_BASE (0x01d0d000)
 
-extern void test_my_uart(void);
-
+void test_my_uart(void);
+void init_my_uart(void);
 #endif /* __PL011__UART__ */
 
