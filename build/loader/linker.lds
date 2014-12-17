@@ -4,7 +4,7 @@
  * Copyright (C) 2008-2009 B Labs Ltd.
  */
 
-load_address = 3238526976;
+load_address = 3235905536;
 ENTRY(_start)
 
 SECTIONS

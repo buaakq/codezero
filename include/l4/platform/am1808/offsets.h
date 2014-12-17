@@ -8,8 +8,14 @@
 #define __PLATFORM_PB926_OFFSETS_H__
 
 /* Physical memory base */
-#define	PLATFORM_PHYS_MEM_START			0x00000000 /* inclusive */
-#define	PLATFORM_PHYS_MEM_END			0x08000000 /* 128 MB, exclusive */
+/*
+#define	PLATFORM_PHYS_MEM_START			0x00000000 
+#define	PLATFORM_PHYS_MEM_END			0x08000000 
+*/
+
+/*new physical memory base*/
+#define	PLATFORM_PHYS_MEM_START			0xc0000000
+#define	PLATFORM_PHYS_MEM_END			0xdfffffff 
 
 /*
  * Device offsets in physical memory
@@ -26,7 +32,11 @@
 #define	PLATFORM_RTC_BASE			0x101E8000 /* Real Time Clock */
 #define	PLATFORM_VIC_BASE			0x10140000 /* Primary Vectored IC */
 #define	PLATFORM_SIC_BASE			0x10003000 /* Secondary IC */
-#define	PLATFORM_UART0_BASE			0x101F1000 /* Console port (UART0) */
+/*
+#define	PLATFORM_UART0_BASE			0x101F1000 
+*/
+
+#define PLATFORM_UART0_BASE         0x01d0d000
 #define	PLATFORM_UART1_BASE			0x101F2000 /* Console port (UART1) */
 #define	PLATFORM_UART2_BASE			0x101F3000 /* Console port (UART2) */
 #define	PLATFORM_UART3_BASE			0x10009000 /* Console port (UART3) */

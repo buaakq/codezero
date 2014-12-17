@@ -157,6 +157,9 @@
 
 
 
+
+
+
         
 
 
@@ -195,7 +198,7 @@
  *
  * Copyright (C) 2007 Bahadir Balban
  */
-phys_ram_start = 0x00000000;
+phys_ram_start = 0xc0000000;
 kernel_offset = 0xF0000000 - phys_ram_start;
 kernel_physical = 0x8000 + phys_ram_start;
 kernel_virtual = kernel_physical + kernel_offset;

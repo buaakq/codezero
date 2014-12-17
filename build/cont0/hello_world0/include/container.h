@@ -5,7 +5,7 @@
 #define __CONTAINER_H__
 
 
-#define __CONTAINER_NAME__	"empty0"
+#define __CONTAINER_NAME__	"hello_world0"
 #define __CONTAINER_ID__	0
 #define __CONTAINER__		"cont0"
 

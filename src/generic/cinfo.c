@@ -12,7 +12,7 @@
 #include INC_PLAT(irq.h)
 
 
-#define CONT0_PAGER_SIZE     0x3048
+#define CONT0_PAGER_SIZE     0x5100
 
 #if defined(CONFIG_CONT0_TYPE_LINUX)
     #define CONT0_PAGER_MAPSIZE \
@@ -27,7 +27,7 @@
 __initdata struct container_info cinfo[] = {
 
 	[0] = {
-	.name = "empty0",
+	.name = "hello_world0",
 	.npagers = 1,
 	.ncaps = 2,
 	.caps = {
@@ -57,10 +57,10 @@ __initdata struct container_info cinfo[] = {
 			.pager_lma = __pfn(CONFIG_CONT0_PAGER_LOAD_ADDR),
 			.pager_vma = __pfn(CONFIG_CONT0_PAGER_VIRT_ADDR),
 			.pager_size = __pfn(page_align_up(CONT0_PAGER_MAPSIZE)),
-			.rw_pheader_start = 0xa0002000L,
-			.rw_pheader_end = 0xa0003048L,
+			.rw_pheader_start = 0xa0004000L,
+			.rw_pheader_end = 0xa0005100L,
 			.rx_pheader_start = 0xa0000000L,
-			.rx_pheader_end = 0xa0001784L,
+			.rx_pheader_end = 0xa000359cL,
 			.ncaps = 10,
 			.caps = {
 

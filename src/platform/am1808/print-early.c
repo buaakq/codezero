@@ -22,8 +22,12 @@ void print_early(char *str)
 	 * string address to physical
 	 */
 	if (reg & 1) {
+    
 		uart_base = PLATFORM_CONSOLE_VBASE;
-	}
+	/*
+        uart_base = 0x01d0d000;
+    */
+    }
 	else {
 		uart_base = PLATFORM_UART0_BASE;
 		str = (char *)(((unsigned long)str & ~KERNEL_AREA_START) |

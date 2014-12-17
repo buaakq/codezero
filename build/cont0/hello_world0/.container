@@ -5,10 +5,10 @@
 	baremetal
 
 [Container Name]
-	empty0
+	hello_world0
 
 [Container Pager LMA]
-	0xc0380000
+	0xc0100000
 
 [Container Pager VMA]
 	0xa0000000
@@ -17,4 +17,4 @@
 	0xa0000000 - 0xb0000000
 
 [Container Physmem Region 0]
-	0xc0380000 - 0xc1080000
+	0xc0100000 - 0xc0e00000

@@ -5,7 +5,7 @@
  */
 
 vma_start = 0xa0000000;
-lma_start = 0xc0380000;
+lma_start = 0xc0100000;
 offset = vma_start - lma_start;
 
 OUTPUT_ARCH(arm)

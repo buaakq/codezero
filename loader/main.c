@@ -111,7 +111,6 @@ int main(void)
 {
 	unsigned long *kernel_entry;
 
-    UARTCharPut(0x01d0d000, '1');
 
 	printf("%s: Loader image size: %luKB, placed "
 	       "at physical 0x%lx - 0x%lx\n",
@@ -123,18 +122,15 @@ int main(void)
 	
     load_elf_image(&kernel_entry, (void *)_start_kernel);
 
-    UARTCharPut(0x01d0d000, '1');
 	
     printf("Loading containers...\n");
 	load_container_images((unsigned long)_start_containers,
 			      (unsigned long)_end_containers);
 
-    UARTCharPut(0x01d0d000, '1');
 	
     printf("elf-loader:\tkernel entry point is 0x%lx\n", *kernel_entry);
 	arch_start_kernel(kernel_entry);
 
-    UARTCharPut(0x01d0d000, '1');
 	
     printf("elf-loader:\tKernel start failed! Looping endless.\n");
 	while (1);

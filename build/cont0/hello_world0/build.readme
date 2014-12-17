@@ -8,7 +8,7 @@ process. It is meant to be the most simple to get on with, therefore if
 you feel any complications, please reach us on our l4dev.org mailing list
 on http://lists.l4dev.org/mailman/listinfo/codezero-devel
 
-You have created a new container called `empty0'.
+You have created a new container called `hello_world0'.
 
 The parameters you have supplied are described in the ".container" file
 placed at the top-level directory. Note, that this is only an informative
